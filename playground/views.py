@@ -165,7 +165,7 @@ class Newsdelete(DeleteView):
     template_name = 'confirm_delete.html' 
     success_url = reverse_lazy('news_list')
 
-class EventList( ListView):
+class EventList(ListView):
     model = Event
     template_name = 'event_list.html'
     context_object_name = 'events'
@@ -179,28 +179,26 @@ class EventList( ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_input'] = self.request.GET.get('search_area', '')
-        context['news_list'] = News.objects.all() 
-        context['formatis'] = Formati.objects.all() 
         return context
    
 class Events_List(ListView):
     model = Event
     template_name = 'EventsList.html'
     context_object_name = 'events'
-    
+
     def get_queryset(self):
-        queryset = Event.objects.filter(publish=True, event_finish_date__gt=timezone.now())
-        theme_filter = self.request.GET.get('theme')  # Récupère le thème sélectionné
+        queryset = super().get_queryset()  # Récupère tous les objets News par défaut
+        theme_filter = self.request.GET.get('theme')  # Récupère le thème sélectionné dans la liste
         if theme_filter:
-            queryset = queryset.filter(theme=theme_filter)  # Filtre les événements par thème
+            queryset = queryset.filter(theme=theme_filter)  # Filtrer les actualités par thème
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['themes'] = sorted(set([theme.strip().lower() for theme in Event.objects.values_list('theme', flat=True).distinct()]))  # Liste des thèmes uniques
+        context['themes'] = sorted(set([theme.strip().lower() for theme in Event.objects.values_list('theme', flat=True).distinct()])) # Liste des thèmes uniques
         context['selected_theme'] = self.request.GET.get('theme', '')  # Thème actuellement sélectionné
-        context['news_list'] = News.objects.all()  # Tous les objets de News
-        context['formatis'] = Formati.objects.all()  # Tous les objets de Formati
+        context['event_list'] = News.objects.all() 
+        context['formatis'] = Formati.objects.all() 
         return context
             
     
